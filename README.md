@@ -19,7 +19,7 @@ For further information about TACACS+ please refer to: https://tools.ietf.org/ht
 ## Installation
 
 ```sh
-$ git clone [git-repo-url] tacacs-php
+$ git clone https://github.com/martinclaro/tacacs-php.git tacacs-php
 $ cd tacacs-php
 $ php tacacs-client.php
 ```
