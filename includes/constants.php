@@ -10,7 +10,7 @@
 * @category Authentication
 * @package  TacacsPlus
 * @author   Martín Claro <martin.claro@gmail.com>
-* @license  GNU General Public License
+* @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
 * @version  GIT: 1.0.0
 * @access   public
 * @link     https://github.com/martinclaro

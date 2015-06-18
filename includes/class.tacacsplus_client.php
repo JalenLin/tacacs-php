@@ -10,7 +10,7 @@
 * @category Authentication
 * @package  TacacsPlus
 * @author   Martín Claro <martin.claro@gmail.com>
-* @license  GNU General Public License
+* @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
 * @version  GIT: 1.0.0
 * @access   public
 * @link     https://github.com/martinclaro
@@ -20,7 +20,6 @@ require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_header.php';
 require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_auth_start.php';
 require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_auth_reply.php';
 require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_auth_cont.php';
-require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_message.php';
 
 /**
 * TacacsPlus_Client represents a TACACS+ Client.
@@ -28,7 +27,7 @@ require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_message.php';
 * @category Authentication
 * @package  TacacsPlus
 * @author   Martín Claro <martin.claro@gmail.com>
-* @license  GNU General Public License
+* @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
 * @access   public
 * @link     https://github.com/martinclaro
 */
