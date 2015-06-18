@@ -64,20 +64,20 @@ class TacacsPlus_Client
         $in = null;
 
         $start = new TacacsPlus_AuthStart();
-        $start->_action         = TAC_PLUS_AUTHEN_LOGIN;
-        $start->_privLevel      = TAC_PLUS_PRIV_LVL_USER;
-        $start->_authen_type    = TAC_PLUS_AUTHEN_TYPE_PAP;
-        $start->_service        = TAC_PLUS_AUTHEN_SVC_NONE;
-        $start->_user           = $username;
-        $start->_port           = strtolower($port);
-        $start->_remoteAddr     = inet_pton($addr);
-        $start->_data           = $password;
+        $start->setAction(TAC_PLUS_AUTHEN_LOGIN);
+        $start->setPrivLevel(TAC_PLUS_PRIV_LVL_USER);
+        $start->setAuthenticationType(TAC_PLUS_AUTHEN_TYPE_PAP);
+        $start->setService(TAC_PLUS_AUTHEN_SVC_NONE);
+        $start->setUsername($username);
+        $start->setPort($port);
+        $start->setRemoteAddress(inet_pton($addr));
+        $start->setData($password);
         $bin_start = $start->toBinary();
 
         $hdr = new TacacsPlus_PacketHeader();
-        $hdr->_version = TAC_PLUS_VER_1;
+        $hdr->setVersion(TAC_PLUS_VER_1);
         $hdr->setSequenceNumber(($this->_lastSeqNo + 1));
-        $hdr->_sessionId = $this->_sessionId;
+        $hdr->setSessionId($this->_sessionId);
         $hdr->setData($bin_start);
         $bin_hdr = $hdr->toBinary();
 
@@ -117,10 +117,10 @@ class TacacsPlus_Client
             $bin_cont = $cont->toBinary();
 
             $hdr = new TacacsPlus_PacketHeader();
-            $hdr->_version = TAC_PLUS_VER_0;
+            $hdr->setVersion(TAC_PLUS_VER_1);
             $hdr->setSequenceNumber(($this->_lastSeqNo + 1));
-            $hdr->_sessionId = $this->_sessionId;
-            $hdr->_dataLen = strlen($bin_start);
+            $hdr->setSessionId($this->_sessionId);
+            $hdr->setData($bin_start);
 
             $bin_hdr = $hdr->toBinary();
             $pad = $hdr->getPseudoPad($this->_secret);
@@ -136,12 +136,8 @@ class TacacsPlus_Client
 
             $pad = $hdr->getPseudoPad($this->_secret);
 
-            $bin_reply = substr(
-                $out,
-                TAC_PLUS_HDR_SIZE
-            );
+            $bin_reply = substr($out, TAC_PLUS_HDR_SIZE);
             $reply = new TacacsPlus_AuthReply(($bin_reply ^ $pad));
-
         }
 
     }

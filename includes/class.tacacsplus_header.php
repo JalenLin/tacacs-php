@@ -29,12 +29,12 @@
 class TacacsPlus_PacketHeader
 {
     private $_debug = false;
-    public $_version = TAC_PLUS_VER_1;
-    public $_type = TAC_PLUS_AUTHEN;
+    private $_version = TAC_PLUS_VER_1;
+    private $_type = TAC_PLUS_AUTHEN;
     private $_seqNo = 0;
-    public $_flags = 0;
-    public $_sessionId = 0;
-    public $_dataLen = 0;
+    private $_flags = 0;
+    private $_sessionId = 0;
+    private $_dataLen = 0;
     private $_data = null;
     private $_pseudoPad = null;
     private $_isEncrypted = true;
@@ -67,7 +67,7 @@ class TacacsPlus_PacketHeader
             }
             $this->_log(print_r($this, true));
 
-        } else if(is_null($binaryData)) {
+        } else if (is_null($binaryData)) {
             // Create from scratch
             $this->_seqNo = 1;
             $this->_flags = TAC_PLUS_SINGLE_CONNECT_FLAG;
@@ -79,6 +79,16 @@ class TacacsPlus_PacketHeader
     public function getSequenceNumber()
     {
         return $this->_seqNo;
+    }
+
+    public function setVersion($val)
+    {
+        $this->_version = $val;
+    }
+
+    public function setSessionId($val)
+    {
+        $this->_sessionId = $val;
     }
 
     public function setSequenceNumber($seq)
@@ -104,7 +114,14 @@ class TacacsPlus_PacketHeader
             ),
             true
         );
-        $this->_log('PSEUDO_PAD (MD5_1): '. print_r(unpack('H*', $this->_pseudoPad)[1], true));
+        $this->_log(
+            'PSEUDO_PAD (MD5_1): '. print_r(
+                unpack(
+                    'H*',
+                    $this->_pseudoPad
+                )[1], true
+            )
+        );
         while (strlen($this->_pseudoPad) < $this->_dataLen) {
             $this->_pseudoPad = $this->_pseudoPad .
                                 hash(
@@ -121,9 +138,23 @@ class TacacsPlus_PacketHeader
                                 );
         }
 
-        $this->_log('PSEUDO_PAD (MD5_n): '. print_r(unpack('H*', $this->_pseudoPad)[1], true));
+        $this->_log(
+            'PSEUDO_PAD (MD5_n): '. print_r(
+                unpack(
+                    'H*',
+                    $this->_pseudoPad
+                )[1], true
+            )
+        );
         $this->_pseudoPad = substr($this->_pseudoPad, 0, $this->_dataLen);
-        $this->_log('PSEUDO_PAD (FINAL): '. print_r(unpack('H*', $this->_pseudoPad)[1], true));
+        $this->_log(
+            'PSEUDO_PAD (FINAL): '. print_r(
+                unpack(
+                    'H*',
+                    $this->_pseudoPad
+                )[1], true
+            )
+        );
         return $this->_pseudoPad;
     }
 

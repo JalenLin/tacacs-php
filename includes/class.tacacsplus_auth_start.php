@@ -28,28 +28,76 @@
 */
 class TacacsPlus_AuthStart
 {
-    private $_debug = false;
-    public $_action         = TAC_PLUS_AUTHEN_LOGIN;
-    public $_privLevel      = TAC_PLUS_PRIV_LVL_USER;
-    public $_authen_type    = TAC_PLUS_AUTHEN_TYPE_PAP;
-    public $_service        = TAC_PLUS_AUTHEN_SVC_LOGIN;
-    public $_user_len       = 0;
-    public $_port_len       = 0;
-    public $_r_addr_len     = 0;
-    public $_data_len       = 0;
-    public $_user           = '';
-    public $_port           = '';
-    public $_remoteAddr     = '';
-    public $_data           = '';
+    private $_debug         = false;
+    private $_action        = TAC_PLUS_AUTHEN_LOGIN;
+    private $_privLevel     = TAC_PLUS_PRIV_LVL_USER;
+    private $_authen_type   = TAC_PLUS_AUTHEN_TYPE_PAP;
+    private $_service       = TAC_PLUS_AUTHEN_SVC_LOGIN;
+    private $_user_len      = 0;
+    private $_port_len      = 0;
+    private $_r_addr_len    = 0;
+    private $_data_len      = 0;
+    private $_user          = '';
+    private $_port          = '';
+    private $_remoteAddr    = '';
+    private $_data          = '';
 
     public function __construct()
     {
         $this->_action = TAC_PLUS_AUTHEN_LOGIN;
     }
 
+    public function setAction($val=TAC_PLUS_AUTHEN_LOGIN)
+    {
+        $this->_action = $val;
+    }
+
+    public function setPrivLevel($val=TAC_PLUS_PRIV_LVL_USER)
+    {
+        $this->_privLevel = $val;
+    }
+
+    public function setAuthenticationType($val=TAC_PLUS_AUTHEN_TYPE_PAP)
+    {
+        $this->_authen_type = $val;
+    }
+
+    public function setService($val=TAC_PLUS_AUTHEN_SVC_LOGIN)
+    {
+        $this->_service = $val;
+    }
+
+    public function setUsername($val=null)
+    {
+        $this->_user = $val;
+        $this->_user_len = strlen($this->_user);
+    }
+
+    public function setPort($val=null)
+    {
+        $this->_port = $val;
+        $this->_port_len = strlen($this->_port);
+    }
+
+    public function setRemoteAddress($val=null)
+    {
+        $this->_remoteAddr = $val;
+        $this->_r_addr_len = strlen($this->_remoteAddr);
+    }
+
+    public function setData($val=null)
+    {
+        $this->_data = $val;
+        $this->_data_len = strlen($this->_data);
+    }
+
+    public function setDebug($val=true)
+    {
+        $this->_debug = $val;
+    }
+
     public function toBinary()
     {
-        $this->_calculate();
         $this->_log(print_r($this, true));
         $bin = pack(
             'CCCCCCCC', $this->_action,
@@ -74,19 +122,6 @@ class TacacsPlus_AuthStart
             $bin .= pack('a*', $this->_data);
         }
         return $bin;
-    }
-
-    public function setDebug($val=true)
-    {
-        $this->_debug = $val;
-    }
-
-    private function _calculate()
-    {
-        $this->_user_len    = strlen($this->_user);
-        $this->_port_len    = strlen($this->_port);
-        $this->_r_addr_len  = strlen($this->_remoteAddr);
-        $this->_data_len    = strlen($this->_data);
     }
 
     private function _log($obj="")

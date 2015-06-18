@@ -4,6 +4,8 @@
 *
 * This source code is provided as a demostration for TACACS+ authentication.
 *
+* PHP Version 5
+*
 * @category Authentication
 * @package  TacacsPlus
 * @author   Martín Claro <martin.claro@gmail.com>
