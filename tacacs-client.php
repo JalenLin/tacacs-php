@@ -102,7 +102,7 @@ class TacacsPlusPacketHeader
     private $_debug = false;
     public $_version = TAC_PLUS_VER_1;
     public $_type = TAC_PLUS_AUTHEN;
-    public $_seqNo = 0;
+    private $_seqNo = 0;
     public $_flags = 0;
     public $_sessionId = 0;
     public $_dataLen = 0;
@@ -112,12 +112,15 @@ class TacacsPlusPacketHeader
 
     public function __construct($binaryData=null)
     {
-        if (!is_null($binaryData) && strlen($binaryData)>TAC_PLUS_HDR_SIZE) {
+        if (!is_null($binaryData) && strlen($binaryData)>=TAC_PLUS_HDR_SIZE) {
             // Decode from data
             $tmp = unpack(
                 'C1version/C1type/C1seq_no/C1flags/N1session_id/N1data_len',
                 substr($binaryData, 0, TAC_PLUS_HDR_SIZE)
             );
+
+            $this->_log(print_r($tmp, true));
+
             $this->_version     = $tmp['version'];
             $this->_type        = $tmp['type'];
             $this->_seqNo       = $tmp['seq_no'];
@@ -135,11 +138,23 @@ class TacacsPlusPacketHeader
             }
             $this->_log(print_r($this, true));
 
-        } else {
+        } else if(is_null($binaryData)) {
             // Create from scratch
             $this->_seqNo = 1;
             $this->_flags = TAC_PLUS_SINGLE_CONNECT_FLAG;
+        } else {
+            $this->_log("ERROR: binary data failed!.");
         }
+    }
+
+    public function getSequenceNumber()
+    {
+        return $this->_seqNo;
+    }
+
+    public function setSequenceNumber($seq)
+    {
+        $this->_seqNo = $seq;
     }
 
     public function setData($binaryData)
@@ -160,6 +175,7 @@ class TacacsPlusPacketHeader
             ),
             true
         );
+        $this->_log('PSEUDO_PAD (MD5_1): '. print_r(unpack('H*', $this->_pseudoPad)[1], true));
         while (strlen($this->_pseudoPad) < $this->_dataLen) {
             $this->_pseudoPad = $this->_pseudoPad .
                                 hash(
@@ -176,8 +192,9 @@ class TacacsPlusPacketHeader
                                 );
         }
 
+        $this->_log('PSEUDO_PAD (MD5_n): '. print_r(unpack('H*', $this->_pseudoPad)[1], true));
         $this->_pseudoPad = substr($this->_pseudoPad, 0, $this->_dataLen);
-        $this->_log(print_r($this, true));
+        $this->_log('PSEUDO_PAD (FINAL): '. print_r(unpack('H*', $this->_pseudoPad)[1], true));
         return $this->_pseudoPad;
     }
 
@@ -466,6 +483,7 @@ class TacacsPlusServer
     private $_secret = 'secretkey';
     private $_socket = null;
     private $_sessionId = 0;
+    private $_lastSeqNo = 0;
 
     public function __construct($debug=false)
     {
@@ -483,7 +501,8 @@ class TacacsPlusServer
     public function authenticate($username, $password, $port="", $addr="")
     {
         mt_srand();
-        $this->_sessionId = mt_rand(1, (pow(2, 32)-1));
+        $this->_sessionId = mt_rand(1, (pow(2, 16)-1));
+        $this->_lastSeqNo = 0;
 
         //--- START ------------------------------------------------------------
         $in = null;
@@ -501,7 +520,7 @@ class TacacsPlusServer
 
         $hdr = new TacacsPlusPacketHeader();
         $hdr->_version = TAC_PLUS_VER_1;
-        $hdr->_seqNo = 1;
+        $hdr->setSequenceNumber(($this->_lastSeqNo + 1));
         $hdr->_sessionId = $this->_sessionId;
         $hdr->setData($bin_start);
         $bin_hdr = $hdr->toBinary();
@@ -514,12 +533,16 @@ class TacacsPlusServer
         //--- REPLY ------------------------------------------------------------
         $out = $this->_recv();
 
+
         $bin_hdr = substr($out, 0, TAC_PLUS_HDR_SIZE);
         $hdr = new TacacsPlusPacketHeader($bin_hdr);
+        $this->_lastSeqNo = $hdr->getSequenceNumber();
         $pad = $hdr->getPseudoPad($this->_secret);
 
         $bin_reply = substr($out, TAC_PLUS_HDR_SIZE);
         $reply = new TacacsPlusAuthReply(($bin_reply ^ $pad));
+
+        $this->_log("RECV: ". print_r(unpack("H*", ($bin_reply ^ $pad))[1], true) ."");
 
         if ($reply->getStatus() == TAC_PLUS_AUTHEN_STATUS_PASS) {
             return true;
@@ -535,12 +558,13 @@ class TacacsPlusServer
             //--- CONT ---------------------------------------------------------
             $in = null;
 
+
             $cont = new TacacsPlusAuthCont();
             $bin_cont = $cont->toBinary();
 
             $hdr = new TacacsPlusPacketHeader();
             $hdr->_version = TAC_PLUS_VER_0;
-            $hdr->_seqNo = ($hdr->_seqNo + 2);
+            $hdr->setSequenceNumber(($this->_lastSeqNo + 1));
             $hdr->_sessionId = $this->_sessionId;
             $hdr->_dataLen = strlen($bin_start);
 
@@ -560,8 +584,7 @@ class TacacsPlusServer
 
             $bin_reply = substr(
                 $out,
-                TAC_PLUS_HDR_SIZE,
-                TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE
+                TAC_PLUS_HDR_SIZE
             );
             $reply = new TacacsPlusAuthReply(($bin_reply ^ $pad));
 
