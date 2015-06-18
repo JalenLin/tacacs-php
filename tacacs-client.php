@@ -542,8 +542,6 @@ class TacacsPlusServer
         $bin_reply = substr($out, TAC_PLUS_HDR_SIZE);
         $reply = new TacacsPlusAuthReply(($bin_reply ^ $pad));
 
-        $this->_log("RECV: ". print_r(unpack("H*", ($bin_reply ^ $pad))[1], true) ."");
-
         if ($reply->getStatus() == TAC_PLUS_AUTHEN_STATUS_PASS) {
             return true;
 
