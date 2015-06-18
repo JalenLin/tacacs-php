@@ -68,7 +68,7 @@ define('TAC_PLUS_AUTHEN_SVC_FWPROXY',   0x09);
 
 define('TAC_PLUS_CONTINUE_FLAG_ABORT',  0x01);
 
-
+// AUTHENTICATION STATUS
 define('TAC_PLUS_AUTHEN_STATUS_PASS',       0x01);
 define('TAC_PLUS_AUTHEN_STATUS_FAIL',       0x02);
 define('TAC_PLUS_AUTHEN_STATUS_GETDATA',    0x03);
@@ -112,7 +112,7 @@ class TacacsPlusPacketHeader
 
     public function __construct($binaryData=null)
     {
-        if (!is_null($binaryData)) {
+        if (!is_null($binaryData) && strlen($binaryData)>TAC_PLUS_HDR_SIZE) {
             // Decode from data
             $tmp = unpack(
                 'C1version/C1type/C1seq_no/C1flags/N1session_id/N1data_len',
@@ -321,9 +321,36 @@ class TacacsPlusAuthStart
 class TacacsPlusAuthCont
 {
     private $_debug = false;
-    public $_user_msg_len   = 0;
-    public $_user_data_len  = 0;
-    public $_flags          = 0;
+    private $_user_msg_len = 0;
+    private $_user_data_len = 0;
+    private $_flags = 0;
+    private $_usr_msg = null;
+    private $_user_data = null;
+
+    public function toBinary()
+    {
+        $this->_calculate();
+        $this->_log(print_r($this, true));
+        $bin = pack(
+            'NNC',
+            $this->_user_msg_len,
+            $this->_user_data_len,
+            $this->_flags
+        );
+        if ($this->_user_msg_len > 0) {
+            $bin .= pack('a*', $this->_usr_msg);
+        }
+        if ($this->_user_data_len > 0) {
+            $bin .= pack('a*', $this->_user_data);
+        }
+        return $bin;
+    }
+
+    private function _calculate()
+    {
+        $this->_user_msg_len    = strlen($this->_usr_msg);
+        $this->_user_data_len    = strlen($this->_user_data);
+    }
 
     private function _log($obj="")
     {
@@ -353,16 +380,16 @@ class TacacsPlusAuthCont
 class TacacsPlusAuthReply
 {
     private $_debug = false;
-    public $_status         = 0;
-    public $_flags          = 0;
-    public $_msg_len        = 0;
-    public $_data_len       = 0;
-    public $_msg            = '';
-    public $_data           = '';
+    private $_status = 0;
+    private $_flags = 0;
+    private $_msg_len = 0;
+    private $_data_len = 0;
+    private $_msg = null;
+    private $_data = null;
 
     public function __construct($binaryData=null)
     {
-        if (!is_null($binaryData)) {
+        if (!is_null($binaryData) && strlen($binaryData)>=TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE) {
             $ptr = 0;
             $reply = unpack(
                 'C1status/C1flags/n1server_msg_len/n1data_len',
@@ -394,6 +421,11 @@ class TacacsPlusAuthReply
             }
         }
         $this->_log(print_r($this, true));
+    }
+
+    public function getStatus()
+    {
+        return $this->_status;
     }
 
     public function setDebug($val=true)
@@ -451,7 +483,7 @@ class TacacsPlusServer
     public function authenticate($username, $password, $port="", $addr="")
     {
         mt_srand();
-        $this->_sessionId = mt_rand(1, (pow(2, 31)-1));
+        $this->_sessionId = mt_rand(1, (pow(2, 32)-1));
 
         //--- START ------------------------------------------------------------
         $in = null;
@@ -489,31 +521,32 @@ class TacacsPlusServer
         $bin_reply = substr($out, TAC_PLUS_HDR_SIZE);
         $reply = new TacacsPlusAuthReply(($bin_reply ^ $pad));
 
-        if ($reply->_status == TAC_PLUS_AUTHEN_STATUS_PASS) {
+        if ($reply->getStatus() == TAC_PLUS_AUTHEN_STATUS_PASS) {
             return true;
 
-        } else if ($reply->_status == TAC_PLUS_AUTHEN_STATUS_ERROR) {
+        } else if ($reply->getStatus() == TAC_PLUS_AUTHEN_STATUS_ERROR) {
             return false;
 
-        } else if ($reply->_status == TAC_PLUS_AUTHEN_STATUS_FAIL) {
+        } else if ($reply->getStatus() == TAC_PLUS_AUTHEN_STATUS_FAIL) {
             return false;
 
-        } else if ($reply->_status == TAC_PLUS_AUTHEN_STATUS_GETPASS) {
+        } else if ($reply->getStatus() == TAC_PLUS_AUTHEN_STATUS_GETPASS) {
 
             //--- CONT ---------------------------------------------------------
             $in = null;
 
             $cont = new TacacsPlusAuthCont();
+            $bin_cont = $cont->toBinary();
 
             $hdr = new TacacsPlusPacketHeader();
             $hdr->_version = TAC_PLUS_VER_0;
             $hdr->_seqNo = ($hdr->_seqNo + 2);
-            $hdr->_sessionId = $tacacs_server_session;
+            $hdr->_sessionId = $this->_sessionId;
             $hdr->_dataLen = strlen($bin_start);
 
             $bin_hdr = $hdr->toBinary();
             $pad = $hdr->getPseudoPad($this->_secret);
-            $in = $bin_hdr . ( $bin_start ^ $pad );
+            $in = $bin_hdr . ( $bin_cont ^ $pad );
 
             $this->_send($in);
 
@@ -550,7 +583,7 @@ class TacacsPlusServer
         $result = socket_connect($this->_socket, $this->_addr, $this->_port);
         if ($result === false) {
             $this->_log(
-                "socket_connect() failed.\reason: ($result) " .
+                "socket_connect() failed: reason: ($result) " .
                 socket_strerror(socket_last_error($this->_socket)) . ""
             );
             return false;
@@ -613,7 +646,7 @@ $tacacs_server_addr         ='192.168.197.150';
 $tacacs_server_port         = 49;
 $tacacs_server_secret       = 'testing123';
 
-$tacacs_user_username       = 'mclaro';
+$tacacs_user_username       = 'testuser';
 $tacacs_user_password       = 'test1234';
 $tacacs_user_port           = 'http';
 $tacacs_user_remote_addr    = '192.168.197.122';
