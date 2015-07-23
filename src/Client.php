@@ -15,14 +15,9 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
-require_once dirname(realpath(__FILE__)) .'/constants.php';
-require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_header.php';
-require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_auth_start.php';
-require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_auth_reply.php';
-require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_auth_cont.php';
-
+namespace TACACS;
 /**
-* TacacsPlus_Client represents a TACACS+ Client.
+* Client represents a TACACS+ Client.
 *
 * @category Authentication
 * @package  TacacsPlus
@@ -31,7 +26,7 @@ require_once dirname(realpath(__FILE__)) .'/class.tacacsplus_auth_cont.php';
 * @access   public
 * @link     https://github.com/martinclaro
 */
-class TacacsPlus_Client
+class Client
 {
     private $_debug = false;
     private $_addr = '127.0.0.1';
@@ -41,12 +36,26 @@ class TacacsPlus_Client
     private $_sessionId = 0;
     private $_lastSeqNo = 0;
 
-    public function __construct($debug=false)
+    /**
+     * Class construct
+     *
+     * @param boolean $debug The debug
+     */
+    public function __construct($debug = false)
     {
         $this->_debug = $debug;
         $this->_log(__CLASS__." created.");
     }
 
+    /**
+     * Set server
+     *
+     * @param string $addr  The addr
+     * @param string $port  The port
+     * @param string $token The token
+     *
+     * @return void
+     */
     public function setServer($addr, $port, $token)
     {
         $this->_addr = $addr;
@@ -54,7 +63,17 @@ class TacacsPlus_Client
         $this->_secret = $token;
     }
 
-    public function authenticate($username, $password, $port="", $addr="")
+    /**
+     * Authenticate
+     *
+     * @param string $username The username
+     * @param string $password The password
+     * @param string $port     The port
+     * @param string $addr     The addr
+     *
+     * @return boolean
+     */
+    public function authenticate($username, $password, $port = "", $addr = "")
     {
         mt_srand();
         $this->_sessionId = mt_rand(1, (pow(2, 16)-1));
@@ -63,7 +82,7 @@ class TacacsPlus_Client
         //--- START ------------------------------------------------------------
         $in = null;
 
-        $start = new TacacsPlus_AuthStart();
+        $start = new AuthStart();
         $start->setAction(TAC_PLUS_AUTHEN_LOGIN);
         $start->setPrivLevel(TAC_PLUS_PRIV_LVL_USER);
         $start->setAuthenticationType(TAC_PLUS_AUTHEN_TYPE_PAP);
@@ -74,7 +93,7 @@ class TacacsPlus_Client
         $start->setData($password);
         $bin_start = $start->toBinary();
 
-        $hdr = new TacacsPlus_PacketHeader();
+        $hdr = new PacketHeader();
         $hdr->setVersion(TAC_PLUS_VER_1);
         $hdr->setSequenceNumber(($this->_lastSeqNo + 1));
         $hdr->setSessionId($this->_sessionId);
@@ -91,12 +110,12 @@ class TacacsPlus_Client
 
 
         $bin_hdr = substr($out, 0, TAC_PLUS_HDR_SIZE);
-        $hdr = new TacacsPlus_PacketHeader($bin_hdr);
+        $hdr = new PacketHeader($bin_hdr);
         $this->_lastSeqNo = $hdr->getSequenceNumber();
         $pad = $hdr->getPseudoPad($this->_secret);
 
         $bin_reply = substr($out, TAC_PLUS_HDR_SIZE);
-        $reply = new TacacsPlus_AuthReply(($bin_reply ^ $pad));
+        $reply = new AuthReply(($bin_reply ^ $pad));
 
         if ($reply->getStatus() == TAC_PLUS_AUTHEN_STATUS_PASS) {
             return true;
@@ -113,10 +132,10 @@ class TacacsPlus_Client
             $in = null;
 
 
-            $cont = new TacacsPlus_AuthCont();
+            $cont = new AuthCont();
             $bin_cont = $cont->toBinary();
 
-            $hdr = new TacacsPlus_PacketHeader();
+            $hdr = new PacketHeader();
             $hdr->setVersion(TAC_PLUS_VER_1);
             $hdr->setSequenceNumber(($this->_lastSeqNo + 1));
             $hdr->setSessionId($this->_sessionId);
@@ -132,16 +151,21 @@ class TacacsPlus_Client
             $out = $this->_recv();
 
             $bin_hdr = substr($out, 0, TAC_PLUS_HDR_SIZE);
-            $hdr = new TacacsPlus_PacketHeader($bin_hdr);
+            $hdr = new PacketHeader($bin_hdr);
 
             $pad = $hdr->getPseudoPad($this->_secret);
 
             $bin_reply = substr($out, TAC_PLUS_HDR_SIZE);
-            $reply = new TacacsPlus_AuthReply(($bin_reply ^ $pad));
+            $reply = new AuthReply(($bin_reply ^ $pad));
         }
 
     }
 
+    /**
+     * Connect
+     *
+     * @return boolean
+     */
     public function connect()
     {
         $this->_socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -165,17 +189,36 @@ class TacacsPlus_Client
         return true;
     }
 
+    /**
+     * Disconnect
+     *
+     * @return void
+     */
     public function disconnect()
     {
         @socket_close($this->_socket);
         $this->_log("Disconnected!");
     }
 
+    /**
+     * Set debug
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
     public function setDebug($val=true)
     {
         $this->_debug = $val;
     }
 
+    /**
+     * Send
+     *
+     * @param string $data The data
+     *
+     * @return void
+     */
     private function _send($data)
     {
         $this->_log("Sending TACACS+ message... ");
@@ -183,6 +226,11 @@ class TacacsPlus_Client
         $this->_log("SENT: ". print_r(unpack("H*", $data)[1], true) ."");
     }
 
+    /**
+     * Recv
+     *
+     * @return string
+     */
     private function _recv()
     {
         $this->_log("Reading TACACS+ response... ");
@@ -200,6 +248,13 @@ class TacacsPlus_Client
         return $out;
     }
 
+    /**
+     * Log
+     *
+     * @param mixed $obj The record to log
+     *
+     * @return void
+     */
     private function _log($obj="")
     {
         if ($this->_debug) {
