@@ -1,5 +1,4 @@
 <?php
-
 /**
 * Tacacs_Client is a sample TACACS+ client for authentication purposes.
 *
@@ -15,9 +14,9 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
-
+namespace TACACS;
 /**
-* TacacsPlus_AuthCont represents a TACACS+ CONT Message.
+* AuthCont represents a TACACS+ CONT Message.
 *
 * @category Authentication
 * @package  TacacsPlus
@@ -26,7 +25,7 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
-class TacacsPlus_AuthCont
+class AuthCont
 {
     private $_debug = false;
     private $_user_msg_len = 0;
@@ -35,6 +34,11 @@ class TacacsPlus_AuthCont
     private $_usr_msg = null;
     private $_user_data = null;
 
+    /**
+     * toBinary
+     *
+     * @return string
+     */
     public function toBinary()
     {
         $this->_calculate();
@@ -54,13 +58,25 @@ class TacacsPlus_AuthCont
         return $bin;
     }
 
+    /**
+     * Calculate
+     *
+     * @return void
+     */
     private function _calculate()
     {
-        $this->_user_msg_len    = strlen($this->_usr_msg);
-        $this->_user_data_len    = strlen($this->_user_data);
+        $this->_user_msg_len = strlen($this->_usr_msg);
+        $this->_user_data_len = strlen($this->_user_data);
     }
 
-    private function _log($obj="")
+    /**
+     * Log
+     *
+     * @param mixed $obj The record to log
+     *
+     * @return void
+     */
+    private function _log($obj = "")
     {
         if ($this->_debug) {
             echo "DEBUG: ";

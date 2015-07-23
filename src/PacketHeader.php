@@ -15,9 +15,9 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
-
+namespace TACACS;
 /**
-* TacacsPlus_PacketHeader represents a TACACS+ Packet Header.
+* PacketHeader represents a TACACS+ Packet Header.
 *
 * @category Authentication
 * @package  TacacsPlus
@@ -26,7 +26,7 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
-class TacacsPlus_PacketHeader
+class PacketHeader
 {
     private $_debug = false;
     private $_version = TAC_PLUS_VER_1;
@@ -39,9 +39,14 @@ class TacacsPlus_PacketHeader
     private $_pseudoPad = null;
     private $_isEncrypted = true;
 
-    public function __construct($binaryData=null)
+    /**
+     * Class constructor
+     *
+     * @param string $binaryData The binary data
+     */
+    public function __construct($binaryData = null)
     {
-        if (!is_null($binaryData) && strlen($binaryData)>=TAC_PLUS_HDR_SIZE) {
+        if (!is_null($binaryData) && strlen($binaryData) >= TAC_PLUS_HDR_SIZE) {
             // Decode from data
             $tmp = unpack(
                 'C1version/C1type/C1seq_no/C1flags/N1session_id/N1data_len',
@@ -57,8 +62,8 @@ class TacacsPlus_PacketHeader
             $this->_sessionId   = $tmp['session_id'];
             $this->_dataLen     = $tmp['data_len'];
             $mask = $this->_flags & TAC_PLUS_UNENCRYPTED_FLAG;
-            if ($mask == TAC_PLUS_UNENCRYPTED_FLAG
-            ) {
+
+            if ($mask == TAC_PLUS_UNENCRYPTED_FLAG) {
                 $this->_log("INFO: TAC_PLUS_UNENCRYPTED_FLAG enabled.");
                 $this->_isEncrypted = false;
             } else {
@@ -76,31 +81,71 @@ class TacacsPlus_PacketHeader
         }
     }
 
+    /**
+     * Get sequence number
+     *
+     * @return string
+     */
     public function getSequenceNumber()
     {
         return $this->_seqNo;
     }
 
+    /**
+     * Set version
+     *
+     * @param string $val The val
+     *
+     * @return void
+     */
     public function setVersion($val)
     {
         $this->_version = $val;
     }
 
+    /**
+     * Set session id
+     *
+     * @param string $val The val
+     *
+     * @return void
+     */
     public function setSessionId($val)
     {
         $this->_sessionId = $val;
     }
 
+    /**
+     * Set sequence number
+     *
+     * @param string $seq The seq
+     *
+     * @return void
+     */
     public function setSequenceNumber($seq)
     {
         $this->_seqNo = $seq;
     }
 
+    /**
+     * Set data
+     *
+     * @param string $binaryData The binary data
+     *
+     * @return void
+     */
     public function setData($binaryData)
     {
         $this->_data = $binaryData;
     }
 
+    /**
+     * Get pseudo pad
+     *
+     * @param string $secret The secret
+     *
+     * @return string
+     */
     public function getPseudoPad($secret)
     {
         $this->_pseudoPad = hash(
@@ -158,6 +203,11 @@ class TacacsPlus_PacketHeader
         return $this->_pseudoPad;
     }
 
+    /**
+     * To binary
+     *
+     * @return string
+     */
     public function toBinary()
     {
         $this->_calculate();
@@ -172,16 +222,35 @@ class TacacsPlus_PacketHeader
         );
     }
 
+    /**
+     * Set debug
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
     public function setDebug($val=true)
     {
         $this->_debug = $val;
     }
 
+    /**
+     * Calculate
+     *
+     * @return void
+     */
     private function _calculate()
     {
         $this->_dataLen = strlen($this->_data);
     }
 
+    /**
+     * Log
+     *
+     * @param mixed $obj The record to log
+     *
+     * @return void
+     */
     private function _log($obj="")
     {
         if ($this->_debug) {

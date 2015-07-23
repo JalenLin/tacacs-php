@@ -15,6 +15,7 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
+namespace TACACS;
 
 // VERSION
 define('TAC_PLUS_MAJOR_VER_MASK', 0xf0);

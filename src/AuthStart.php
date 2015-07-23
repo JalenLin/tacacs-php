@@ -15,9 +15,9 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
-
+namespace TACACS;
 /**
-* TacacsPlus_AuthStart represents a TACACS+ START Message.
+* AuthStart represents a TACACS+ START Message.
 *
 * @category Authentication
 * @package  TacacsPlus
@@ -26,7 +26,7 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
-class TacacsPlus_AuthStart
+class AuthStart
 {
     private $_debug         = false;
     private $_action        = TAC_PLUS_AUTHEN_LOGIN;
@@ -42,60 +42,131 @@ class TacacsPlus_AuthStart
     private $_remoteAddr    = '';
     private $_data          = '';
 
+    /**
+     * Class constructor
+     */
     public function __construct()
     {
         $this->_action = TAC_PLUS_AUTHEN_LOGIN;
     }
 
-    public function setAction($val=TAC_PLUS_AUTHEN_LOGIN)
+    /**
+     * Set action
+     *
+     * @param string $val The val
+     *
+     * @return void
+     */
+    public function setAction($val = TAC_PLUS_AUTHEN_LOGIN)
     {
         $this->_action = $val;
     }
 
-    public function setPrivLevel($val=TAC_PLUS_PRIV_LVL_USER)
+    /**
+     * Set priv level
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
+    public function setPrivLevel($val = TAC_PLUS_PRIV_LVL_USER)
     {
         $this->_privLevel = $val;
     }
 
-    public function setAuthenticationType($val=TAC_PLUS_AUTHEN_TYPE_PAP)
+    /**
+     * Set authentication type
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
+    public function setAuthenticationType($val = TAC_PLUS_AUTHEN_TYPE_PAP)
     {
         $this->_authen_type = $val;
     }
 
-    public function setService($val=TAC_PLUS_AUTHEN_SVC_LOGIN)
+    /**
+     * Set service
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
+    public function setService($val = TAC_PLUS_AUTHEN_SVC_LOGIN)
     {
         $this->_service = $val;
     }
 
-    public function setUsername($val=null)
+    /**
+     * Set username
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
+    public function setUsername($val = null)
     {
         $this->_user = $val;
         $this->_user_len = strlen($this->_user);
     }
 
-    public function setPort($val=null)
+    /**
+     * Set port
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
+    public function setPort($val = null)
     {
         $this->_port = $val;
         $this->_port_len = strlen($this->_port);
     }
 
-    public function setRemoteAddress($val=null)
+    /**
+     * Set remote address
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
+    public function setRemoteAddress($val = null)
     {
         $this->_remoteAddr = $val;
         $this->_r_addr_len = strlen($this->_remoteAddr);
     }
 
-    public function setData($val=null)
+    /**
+     * Set data
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
+    public function setData($val = null)
     {
         $this->_data = $val;
         $this->_data_len = strlen($this->_data);
     }
 
-    public function setDebug($val=true)
+    /**
+     * Set debug
+     *
+     * @param type $val The val
+     *
+     * @return void
+     */
+    public function setDebug($val = true)
     {
         $this->_debug = $val;
     }
 
+    /**
+     * To binary
+     *
+     * @return string
+     */
     public function toBinary()
     {
         $this->_log(print_r($this, true));
@@ -124,6 +195,13 @@ class TacacsPlus_AuthStart
         return $bin;
     }
 
+    /**
+     * Log
+     *
+     * @param mixed $obj The record to log
+     *
+     * @return void
+     */
     private function _log($obj="")
     {
         if ($this->_debug) {

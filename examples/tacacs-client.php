@@ -19,8 +19,9 @@ error_reporting(E_ALL);
 set_time_limit(0);
 ob_implicit_flush();
 
-define('TAC_LIB_ROOT', dirname(realpath(__FILE__)).'/includes');
-require_once TAC_LIB_ROOT .'/class.tacacsplus_client.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use TACACS\Client;
 
 // RUNTIME
 $tacacs_server_addr         ='192.168.197.150';
@@ -32,7 +33,7 @@ $tacacs_user_password       = 'test1234';
 $tacacs_user_port           = 'http';
 $tacacs_user_remote_addr    = '192.168.197.122';
 
-$srv = new TacacsPlus_Client(true);
+$srv = new Client(true);
 $srv->setServer(
     $tacacs_server_addr,
     $tacacs_server_port,

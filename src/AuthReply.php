@@ -15,9 +15,9 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
-
+namespace TACACS;
 /**
-* TacacsPlus_AuthReply represents a TACACS+ REPLY Message.
+* AuthReply represents a TACACS+ REPLY Message.
 *
 * @category Authentication
 * @package  TacacsPlus
@@ -26,7 +26,7 @@
 * @access   public
 * @link     https://github.com/martinclaro
 */
-class TacacsPlus_AuthReply
+class AuthReply
 {
     private $_debug = false;
     private $_status = 0;
@@ -36,11 +36,14 @@ class TacacsPlus_AuthReply
     private $_msg = null;
     private $_data = null;
 
-    public function __construct($binaryData=null)
+    /**
+     * Class constructor
+     *
+     * @param string $binaryData The binary data
+     */
+    public function __construct($binaryData = null)
     {
-        if (!is_null($binaryData)
-            && strlen($binaryData)>=TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE
-        ) {
+        if (!is_null($binaryData) && strlen($binaryData) >= TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE) {
             $ptr = 0;
             $reply = unpack(
                 'C1status/C1flags/n1server_msg_len/n1data_len',
@@ -74,16 +77,35 @@ class TacacsPlus_AuthReply
         $this->_log(print_r($this, true));
     }
 
+    /**
+     * Get status
+     *
+     * @return string
+     */
     public function getStatus()
     {
         return $this->_status;
     }
 
+    /**
+     * Set debug
+     *
+     * @param boolean $val The value
+     *
+     * @return void
+     */
     public function setDebug($val=true)
     {
         $this->_debug = $val;
     }
 
+    /**
+     * Log
+     *
+     * @param mixed $obj The record to log
+     *
+     * @return void
+     */
     private function _log($obj="")
     {
         if ($this->_debug) {
