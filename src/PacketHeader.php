@@ -29,7 +29,7 @@ namespace TACACS;
 class PacketHeader
 {
     private $_debug = false;
-    private $_version = TAC_PLUS_VER_1;
+    private $_version = TAC_PLUS_VER_ONE;
     private $_type = TAC_PLUS_AUTHEN;
     private $_seqNo = 0;
     private $_flags = 0;

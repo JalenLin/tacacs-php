@@ -1,31 +1,27 @@
 <?php
-
 /**
-* Tacacs_Client is a sample TACACS+ client for authentication purposes.
-*
-* This source code is provided as a demostration for TACACS+ authentication.
-*
-* PHP version 5
-*
-* @category Authentication
-* @package  TacacsPlus
-* @author   Martín Claro <martin.claro@gmail.com>
-* @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
-* @version  GIT: 1.0.0
-* @access   public
-* @link     https://github.com/martinclaro
-*/
+ * Tacacs_Client is a sample TACACS+ client for authentication purposes.
+ *
+ * This source code is provided as a demostration for TACACS+ authentication.
+ *
+ * PHP version 5
+ *
+ * @category Authentication
+ * @package  TacacsPlus
+ * @author   Martín Claro <martin.claro@gmail.com>
+ * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
+ * @link     https://github.com/martinclaro
+ */
 namespace TACACS;
 /**
-* AuthStart represents a TACACS+ START Message.
-*
-* @category Authentication
-* @package  TacacsPlus
-* @author   Martín Claro <martin.claro@gmail.com>
-* @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
-* @access   public
-* @link     https://github.com/martinclaro
-*/
+ * AuthStart represents a TACACS+ START Message.
+ *
+ * @category Authentication
+ * @package  TacacsPlus
+ * @author   Martín Claro <martin.claro@gmail.com>
+ * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
+ * @link     https://github.com/martinclaro
+ */
 class AuthStart
 {
     private $_debug         = false;
