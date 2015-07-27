@@ -6,41 +6,54 @@
  *
  * PHP version 5
  *
- * @category Authentication
+ * @category Common
  * @package  TacacsPlus
  * @author   Martín Claro <martin.claro@gmail.com>
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link     https://github.com/martinclaro
  */
-namespace TACACS\Common\Packet;
+namespace TACACS\Common\Builder;
 /**
  * PacketHeader represents a TACACS+ Packet Header.
  *
- * @category Authentication
+ * @category Common
  * @package  TacacsPlus
  * @author   Martín Claro <martin.claro@gmail.com>
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link     https://github.com/martinclaro
  */
-class AbstractBody implements BinarizableInterface
+abstract class AbstractPacketBuilder implements PacketBuilderInterface
 {
-    /**
-     * Parse binary data
-     *
-     * @param string $binaryData The binary data
-     *
-     * @return void
-     */
-    public function parseBinary($binaryData)
-    {
-    }
+    protected $secret;
 
     /**
-     * To binary
+     * Build
+     *
+     * @return Packet
+     */
+    abstract public function build();
+
+    /**
+     * Gets the value of secret.
      *
      * @return string
      */
-    public function toBinary()
+    public function getSecret()
     {
+        return $this->secret;
+    }
+
+    /**
+     * Sets the value of secret.
+     *
+     * @param string $secret the secret
+     *
+     * @return self
+     */
+    public function setSecret($secret)
+    {
+        $this->secret = $secret;
+
+        return $this;
     }
 }

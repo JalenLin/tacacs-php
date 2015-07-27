@@ -22,7 +22,7 @@ namespace TACACS\Common\Packet;
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link     https://github.com/martinclaro
  */
-class AbstractBody implements BinarizableInterface
+interface BinarizableInterface
 {
     /**
      * Parse binary data
@@ -31,16 +31,12 @@ class AbstractBody implements BinarizableInterface
      *
      * @return void
      */
-    public function parseBinary($binaryData)
-    {
-    }
+    public function parseBinary($binaryData);
 
     /**
      * To binary
      *
      * @return string
      */
-    public function toBinary()
-    {
-    }
+    public function toBinary();
 }

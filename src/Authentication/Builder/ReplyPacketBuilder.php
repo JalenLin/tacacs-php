@@ -12,11 +12,12 @@
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link     https://github.com/martinclaro
  */
-namespace TACACS\Authentication;
+namespace TACACS\Authentication\Builder;
 
-use TACACS\Authentication\Packet\ReplyBody;
+use TACACS\Common\Builder\AbstractPacketBuilder;
 use TACACS\Common\Packet\Header;
 use TACACS\Common\Packet\Packet;
+use TACACS\Authentication\Packet\ReplyBody;
 /**
  * PacketHeader represents a TACACS+ Packet Header.
  *
@@ -26,10 +27,8 @@ use TACACS\Common\Packet\Packet;
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link     https://github.com/martinclaro
  */
-class ReplyPacketBuilder
+class ReplyPacketBuilder extends AbstractPacketBuilder
 {
-    protected $secret;
-
     /**
      * Build
      *
@@ -44,29 +43,5 @@ class ReplyPacketBuilder
         $packet->setSecret($this->secret);
 
         return $packet;
-    }
-
-    /**
-     * Gets the value of secret.
-     *
-     * @return string
-     */
-    public function getSecret()
-    {
-        return $this->secret;
-    }
-
-    /**
-     * Sets the value of secret.
-     *
-     * @param string $secret the secret
-     *
-     * @return self
-     */
-    public function setSecret($secret)
-    {
-        $this->secret = $secret;
-
-        return $this;
     }
 }

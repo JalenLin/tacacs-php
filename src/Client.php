@@ -36,6 +36,9 @@ class Client
     protected $socket = null;
     protected $lastSeqNo = 0;
 
+    protected $startPacketBuilder;
+    protected $replyPacketBuilder;
+
     /**
      * Class construct
      *
@@ -110,33 +113,11 @@ class Client
         } else if ($reply->getBody()->getStatus() == TAC_PLUS_AUTHEN_STATUS_FAIL) {
             return false;
 
-        } else if ($reply->getBody()->getStatus() == TAC_PLUS_AUTHEN_STATUS_GETPASS) {
-
-            //--- CONT ---------------------------------------------------------
-            $in = null;
-
-
-            $cont = new AuthCont();
-            $bin_cont = $cont->toBinary();
-
-            $hdr = new PacketHeader();
-            $hdr->setVersion(TAC_PLUS_VER_ONE);
-            $hdr->setSequenceNumber(($this->lastSeqNo + 1));
-            $hdr->setSessionId($sessionId);
-            $hdr->setData($bin_start);
-
-            $bin_hdr = $hdr->toBinary();
-            $pad = $hdr->getPseudoPad($this->secret);
-            $in = $bin_hdr . ( $bin_cont ^ $pad );
-
-            $this->send($in);
-
-            //--- REPLY --------------------------------------------------------
-            $out = $this->recv();
-
-            $builder = $this->getReplyPacketBuilder();
-            $reply = $builder->build();
-            $reply->parseBinary($out);
+        } else {
+            /**
+             * @todo CONTINUE implementation
+             */
+            throw new \RuntimeException("Unsupported CONTINUE packet flow");
         }
 
         $this->disconnect();
@@ -149,7 +130,10 @@ class Client
      */
     protected function getStartPacketBuilder()
     {
-        return new \TACACS\Authentication\StartPacketBuilder();
+        if (!$this->startPacketBuilder) {
+            $this->startPacketBuilder = new \TACACS\Authentication\Builder\StartPacketBuilder();
+        }
+        return $this->startPacketBuilder;
     }
 
     /**
@@ -159,7 +143,10 @@ class Client
      */
     protected function getReplyPacketBuilder()
     {
-        return new \TACACS\Authentication\ReplyPacketBuilder();
+        if (!$this->replyPacketBuilder) {
+            $this->replyPacketBuilder = new \TACACS\Authentication\Builder\ReplyPacketBuilder();
+        }
+        return $this->replyPacketBuilder;
     }
 
     /**

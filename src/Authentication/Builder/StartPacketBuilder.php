@@ -12,11 +12,12 @@
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link     https://github.com/martinclaro
  */
-namespace TACACS\Authentication;
+namespace TACACS\Authentication\Builder;
 
-use TACACS\Authentication\Packet\StartBody;
+use TACACS\Common\Builder\AbstractPacketBuilder;
 use TACACS\Common\Packet\Header;
 use TACACS\Common\Packet\Packet;
+use TACACS\Authentication\Packet\StartBody;
 /**
  * PacketHeader represents a TACACS+ Packet Header.
  *
@@ -26,9 +27,8 @@ use TACACS\Common\Packet\Packet;
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link     https://github.com/martinclaro
  */
-class StartPacketBuilder
+class StartPacketBuilder extends AbstractPacketBuilder
 {
-    protected $secret;
     protected $username;
     protected $password;
     protected $port;
@@ -58,30 +58,6 @@ class StartPacketBuilder
         $packet->setSecret($this->secret);
 
         return $packet;
-    }
-
-    /**
-     * Gets the value of secret.
-     *
-     * @return string
-     */
-    public function getSecret()
-    {
-        return $this->secret;
-    }
-
-    /**
-     * Sets the value of secret.
-     *
-     * @param string $secret the secret
-     *
-     * @return self
-     */
-    public function setSecret($secret)
-    {
-        $this->secret = $secret;
-
-        return $this;
     }
 
     /**

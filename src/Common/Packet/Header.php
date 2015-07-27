@@ -22,7 +22,7 @@ namespace TACACS\Common\Packet;
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link     https://github.com/martinclaro
  */
-class Header
+class Header implements BinarizableInterface
 {
     protected $version = TAC_PLUS_VER_DEFAULT;
     protected $type = TAC_PLUS_AUTHEN;
