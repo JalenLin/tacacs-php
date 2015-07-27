@@ -17,7 +17,6 @@
     },
     "require": {
         "php": ">= 5.3.0",
-        "clue/socket-raw": "1.1.0",
         "monolog/monolog": "1.*"
     },
     "require-dev": {
