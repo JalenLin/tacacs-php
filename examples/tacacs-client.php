@@ -10,8 +10,6 @@
 * @package  TacacsPlus
 * @author   Martín Claro <martin.claro@gmail.com>
 * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
-* @version  GIT: 1.0.0
-* @access   public
 * @link     https://github.com/martinclaro
 */
 
@@ -23,17 +21,18 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use TACACS\Client;
 use Monolog\Logger;
-use Monolog\Handler\ErrorLogHandler;
+
+// /usr/bin/tac_plus -C /etc/tac_plus.conf  -L -p 49 -d128 -g
 
 // RUNTIME
 $tacacs_server_addr         ='127.0.0.1';
 $tacacs_server_port         = 4949;
-$tacacs_server_secret       = 'MYKEY';
+$tacacs_server_secret       = 'testing123';
 
 $tacacs_user_username       = 'testuser';
 $tacacs_user_password       = 'test1234';
-$tacacs_user_port           = '80';
-$tacacs_user_remote_addr    = '';
+$tacacs_user_port           = 'http';
+$tacacs_user_remote_addr    = '192.168.197.122';
 
 $logger = new Logger('tacacs');
 

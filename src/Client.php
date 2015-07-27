@@ -51,8 +51,8 @@ class Client
     /**
      * Set server
      *
-     * @param string $addr  The addr
-     * @param string $port  The port
+     * @param string $addr   The addr
+     * @param string $port   The port
      * @param string $secret The secret
      *
      * @return void
@@ -81,8 +81,9 @@ class Client
         $sessionId = $this->genSessionId();
         $this->lastSeqNo = 1;
 
-        //--- START ------------------------------------------------------------
+        // START
         $builder = $this->getStartPacketBuilder();
+        $builder->setSecret($this->secret);
         $builder->setUsername($username);
         $builder->setPassword($password);
         $builder->setPort($port);
@@ -90,15 +91,13 @@ class Client
         $builder->setSequenceNumber($this->lastSeqNo);
         $builder->setSessionId($sessionId);
         $start = $builder->build();
+        $this->send($start);
+        $this->log(print_r($start, true));
 
-        $this->send($start->toBinary());
+        // REPLY
+        $reply = $this->recv();
+        $this->log(print_r($reply, true));
 
-        //--- REPLY ------------------------------------------------------------
-        $out = $this->recv();
-
-        $builder = $this->getReplyPacketBuilder();
-        $reply = $builder->build();
-        $reply->parseBinary($out);
 
         $this->lastSeqNo = $reply->getHeader()->getSequenceNumber();
 
@@ -205,15 +204,25 @@ class Client
     /**
      * Send
      *
-     * @param string $data The data
+     * @param Packet $packet The packet
      *
      * @return void
      */
-    protected function send($data)
+    protected function send($packet)
     {
         $this->log("Sending TACACS+ message... ");
-        socket_write($this->socket, $data, strlen($data));
-        $this->log("SENT: ". print_r(unpack("H*", $data)[1], true) ."");
+
+        $data = $packet->toBinary();
+
+        @socket_write($this->socket, $data, strlen($data));
+
+        $unpack = unpack("H*", $data)[1];
+        $unpackHeader = unpack("H*", substr($data, 0, TAC_PLUS_HDR_SIZE))[1];
+        $unpackBody = unpack("H*", substr($data, TAC_PLUS_HDR_SIZE))[1];
+
+        $this->log("SENT: ". print_r($unpack, true));
+        $this->log("SENT (Header): ". print_r($unpackHeader, true));
+        $this->log("SENT (Body): " . print_r($unpackBody, true));
     }
 
     /**
@@ -224,18 +233,23 @@ class Client
     protected function recv()
     {
         $this->log("Reading TACACS+ response... ");
+
         $out = null;
         $bytes = 0;
-        if (false !== ($bytes = socket_recv(
-            $this->socket, $out,
-            2048, MSG_WAITALL
-        ))) {
+        if (false !== ($bytes = @socket_recv($this->socket, $out, 2048, MSG_WAITALL))) {
             $this->log("DONE (read $bytes bytes)!");
         } else {
             $this->log("ERROR READING SOCKET!");
         }
+
         $this->log("RECV: ". print_r(unpack("H*", $out)[1], true) ."");
-        return $out;
+
+        $builder = $this->getReplyPacketBuilder();
+        $builder->setSecret($this->secret);
+        $reply = $builder->build();
+        $reply->parseBinary($out);
+
+        return $reply;
     }
 
     /**

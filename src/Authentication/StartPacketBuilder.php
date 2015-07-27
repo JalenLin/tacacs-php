@@ -28,6 +28,7 @@ use TACACS\Common\Packet\Packet;
  */
 class StartPacketBuilder
 {
+    protected $secret;
     protected $username;
     protected $password;
     protected $port;
@@ -54,8 +55,33 @@ class StartPacketBuilder
         $header->setSessionId($this->sessionId);
 
         $packet = new Packet($header, $body);
+        $packet->setSecret($this->secret);
 
         return $packet;
+    }
+
+    /**
+     * Gets the value of secret.
+     *
+     * @return string
+     */
+    public function getSecret()
+    {
+        return $this->secret;
+    }
+
+    /**
+     * Sets the value of secret.
+     *
+     * @param string $secret the secret
+     *
+     * @return self
+     */
+    public function setSecret($secret)
+    {
+        $this->secret = $secret;
+
+        return $this;
     }
 
     /**

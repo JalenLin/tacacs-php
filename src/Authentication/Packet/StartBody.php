@@ -29,7 +29,7 @@ class StartBody extends AbstractBody
     protected $action = TAC_PLUS_AUTHEN_LOGIN;
     protected $privilegeLevel = TAC_PLUS_PRIV_LVL_USER;
     protected $authenticationType = TAC_PLUS_AUTHEN_TYPE_PAP;
-    protected $service = TAC_PLUS_AUTHEN_SVC_LOGIN;
+    protected $service = TAC_PLUS_AUTHEN_SVC_NONE;
     protected $user = '';
     protected $port = '';
     protected $remoteAddress = '';

@@ -28,6 +28,8 @@ use TACACS\Common\Packet\Packet;
  */
 class ReplyPacketBuilder
 {
+    protected $secret;
+
     /**
      * Build
      *
@@ -37,8 +39,34 @@ class ReplyPacketBuilder
     {
         $header = new Header();
         $body = new ReplyBody();
+
         $packet = new Packet($header, $body);
+        $packet->setSecret($this->secret);
 
         return $packet;
+    }
+
+    /**
+     * Gets the value of secret.
+     *
+     * @return string
+     */
+    public function getSecret()
+    {
+        return $this->secret;
+    }
+
+    /**
+     * Sets the value of secret.
+     *
+     * @param string $secret the secret
+     *
+     * @return self
+     */
+    public function setSecret($secret)
+    {
+        $this->secret = $secret;
+
+        return $this;
     }
 }
