@@ -22,8 +22,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use TACACS\Client;
 use Monolog\Logger;
 
-// /usr/bin/tac_plus -C /etc/tac_plus.conf  -L -p 49 -d128 -g
-
 // RUNTIME
 $tacacs_server_addr         ='127.0.0.1';
 $tacacs_server_port         = 4949;
