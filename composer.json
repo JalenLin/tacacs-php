@@ -16,9 +16,10 @@
         "files": ["src/Constants.php"]
     },
     "require": {
-        "php": ">= 5.3.0"
+        "php": ">= 5.3.0",
+        "monolog/monolog": "1.*"
     },
     "require-dev": {
-        "phpunit/phpunit": "4.2.*"
+        "phpunit/phpunit": "4.*"
     }
 }
