@@ -46,7 +46,7 @@ class StartPacketBuilder extends AbstractPacketBuilder
         $body = new StartBody();
         $body->setUser($this->username);
         $body->setPort($this->port);
-        $body->setRemoteAddress(@inet_pton($this->remoteAddress));
+        $body->setRemoteAddress($this->remoteAddress);
         $body->setData($this->password);
 
         $header = new Header();

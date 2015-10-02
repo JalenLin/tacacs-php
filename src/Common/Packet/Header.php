@@ -100,7 +100,9 @@ class Header implements BinarizableInterface
      */
     public function getPseudoPad($secret)
     {
-        $pseudoPad = hash(
+        $md5 = array();
+        $n = 1;
+        $md5[$n] = hash(
             'md5',
             pack(
                 'Na*CC',
@@ -112,8 +114,9 @@ class Header implements BinarizableInterface
             true
         );
 
-        while (strlen($pseudoPad) < $this->lenght) {
-            $pseudoPad .= hash(
+        while (strlen(implode($md5)) < $this->lenght) {
+            $n++;
+            $md5[$n] = hash(
                 'md5',
                 pack(
                     'Na*CC',
@@ -122,12 +125,12 @@ class Header implements BinarizableInterface
                     $this->version,
                     $this->sequenceNumber
                 ) .
-                $pseudoPad,
+                $md5[($n - 1)],
                 true
             );
         }
 
-        $pseudoPad = substr($pseudoPad, 0, $this->lenght);
+        $pseudoPad = substr(implode($md5), 0, $this->lenght);
 
         return $pseudoPad;
     }
