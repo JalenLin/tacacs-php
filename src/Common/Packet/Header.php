@@ -72,8 +72,8 @@ class Header implements BinarizableInterface
 
         } else if (is_null($binaryData)) {
             // Create from scratch
-            $this->_sequenceNumber = 1;
-            $this->_flags = TAC_PLUS_SINGLE_CONNECT_FLAG;
+            $this->sequenceNumber = 1;
+            $this->flags = TAC_PLUS_SINGLE_CONNECT_FLAG;
 
         } else {
             throw new \UnexpectedValueException("Binary header failed");
@@ -87,7 +87,7 @@ class Header implements BinarizableInterface
      */
     public function isEncrypted()
     {
-        $mask = $this->_flags & TAC_PLUS_UNENCRYPTED_FLAG;
+        $mask = $this->flags & TAC_PLUS_UNENCRYPTED_FLAG;
 
         return $mask != TAC_PLUS_UNENCRYPTED_FLAG;
     }

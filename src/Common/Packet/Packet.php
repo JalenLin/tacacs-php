@@ -65,7 +65,13 @@ class Packet implements BinarizableInterface
 
         $pad = $this->header->getPseudoPad($this->secret);
 
-        return $binHeader . ( $binBody ^ $pad );
+        if($this->header->isEncrypted()) {
+            $binData = $binHeader . ( $binBody ^ $pad );
+        } else {
+            $binData = $binHeader . $binBody;
+        }
+
+        return $binData;
     }
 
     /**
@@ -83,7 +89,12 @@ class Packet implements BinarizableInterface
 
         $pad = $this->header->getPseudoPad($this->secret);
 
-        $reply = $this->body->parseBinary(($binData['body'] ^ $pad));
+        if($this->header->isEncrypted()) {
+            $binBody = ($binData['body'] ^ $pad);
+        } else {
+            $binBody = $binData['body'];
+        }
+        $reply = $this->body->parseBinary($binBody);
     }
 
     /**
