@@ -18,12 +18,18 @@
 namespace TACACS;
 
 // VERSION
-define('TAC_PLUS_MAJOR_VER_MASK', 0xf0);
-define('TAC_PLUS_MAJOR_VER',      0xc0);
+define('TAC_PLUS_MAJOR_VER_MASK',       0xf0);
+define('TAC_PLUS_MAJOR_VER',            0xc0);
 define('TAC_PLUS_MINOR_VER_DEFAULT',    0x00);
-define('TAC_PLUS_VER_DEFAULT',          (TAC_PLUS_MAJOR_VER | TAC_PLUS_MINOR_VER_DEFAULT));
-define('TAC_PLUS_MINOR_VER_ONE',    0x01);
-define('TAC_PLUS_VER_ONE',          (TAC_PLUS_MAJOR_VER | TAC_PLUS_MINOR_VER_ONE));
+define(
+    'TAC_PLUS_VER_DEFAULT',
+    (TAC_PLUS_MAJOR_VER | TAC_PLUS_MINOR_VER_DEFAULT)
+);
+define('TAC_PLUS_MINOR_VER_ONE',        0x01);
+define(
+    'TAC_PLUS_VER_ONE',
+    (TAC_PLUS_MAJOR_VER | TAC_PLUS_MINOR_VER_ONE)
+);
 
 // TYPE
 define('TAC_PLUS_AUTHEN',   0x01);

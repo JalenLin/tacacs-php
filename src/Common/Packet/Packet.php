@@ -60,7 +60,7 @@ class Packet implements BinarizableInterface
     {
         $binBody = $this->body->toBinary();
 
-        $this->header->setLenght(strlen($binBody));
+        $this->header->setLenght(Util::binaryLength($binBody));
         $binHeader = $this->header->toBinary();
 
         $pad = $this->header->getPseudoPad($this->secret);
@@ -75,13 +75,15 @@ class Packet implements BinarizableInterface
      */
     public function parseBinary($binaryData)
     {
-        $binHeader = substr($binaryData, 0, TAC_PLUS_HDR_SIZE);
-        $this->header->parseBinary($binHeader);
+
+        $unpackMask = "a" . TAC_PLUS_HDR_SIZE . "header/a*body";
+        $binData = unpack($unpackMask, $binaryData);
+
+        $this->header->parseBinary($binData['header']);
 
         $pad = $this->header->getPseudoPad($this->secret);
 
-        $binBody = substr($binaryData, TAC_PLUS_HDR_SIZE);
-        $reply = $this->body->parseBinary(($binBody ^ $pad));
+        $reply = $this->body->parseBinary(($binData['body'] ^ $pad));
     }
 
     /**

@@ -15,6 +15,7 @@
 namespace TACACS\Authentication\Packet;
 
 use TACACS\Common\Packet\AbstractBody;
+use TACACS\Common\Packet\Util;
 /**
  * PacketHeader represents a TACACS+ Packet Header.
  *
@@ -40,35 +41,39 @@ class ReplyBody extends AbstractBody
      */
     public function parseBinary($binaryData)
     {
-        if (!is_null($binaryData) && strlen($binaryData) >= TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE) {
-            $ptr = 0;
+        if (!is_null($binaryData)
+            && Util::binaryLength($binaryData) >= TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE
+        ) {
             $reply = unpack(
                 'C1status/C1flags/n1server_msgLenght/n1dataLenght',
-                substr($binaryData, $ptr, TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE)
+                $binaryData
             );
+
             $this->status      = $reply['status'];
             $this->flags       = $reply['flags'];
             $this->msgLenght     = $reply['server_msgLenght'];
             $this->dataLenght    = $reply['dataLenght'];
 
-            if ($this->msgLenght > 0) {
-                $ptr += TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE;
-                $this->msg = unpack(
-                    'a*', substr(
-                        $binaryData,
-                        $ptr,
-                        $this->msgLenght
-                    )
-                )[1];
-            }
-            if ($this->dataLenght > 0) {
-                $ptr += $this->msgLenght;
-                $this->data = unpack(
-                    'a*', substr(
-                        $binaryData,
-                        $ptr, $this->dataLenght
-                    )
-                )[1];
+            $checkLen = TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE
+                        + $this->msgLenght + $this->dataLenght;
+
+            if (Util::binaryLength($binaryData) == $checkLen) {
+                $unpackMask = 'a' . TAC_AUTHEN_REPLY_FIXED_FIELDS_SIZE . 'header';
+                if ($this->msgLenght > 0) {
+                    $unpackMask .= '/a' . $this->msgLenght .'msg';
+                }
+                if ($this->dataLenght > 0) {
+                    $unpackMask .= '/a' . $this->dataLenght .'data';
+                }
+
+                $unpack = unpack($unpackMask, $binaryData);
+
+                if ($this->msgLenght > 0) {
+                    $this->msg = $unpack['msg'];
+                }
+                if ($this->dataLenght > 0) {
+                    $this->data = $unpack['data'];
+                }
             }
         }
     }

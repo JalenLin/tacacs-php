@@ -15,6 +15,7 @@
 namespace TACACS\Authentication\Packet;
 
 use TACACS\Common\Packet\AbstractBody;
+use TACACS\Common\Packet\Util;
 /**
  * PacketHeader represents a TACACS+ Packet Header.
  *
@@ -48,21 +49,21 @@ class StartBody extends AbstractBody
             $this->privilegeLevel,
             $this->authenticationType,
             $this->service,
-            strlen($this->user),
-            strlen($this->port),
-            strlen($this->remoteAddress),
-            strlen($this->data)
+            Util::binaryLength($this->user),
+            Util::binaryLength($this->port),
+            Util::binaryLength($this->remoteAddress),
+            Util::binaryLength($this->data)
         );
-        if (strlen($this->user) > 0) {
+        if (Util::binaryLength($this->user) > 0) {
             $bin .= pack('a*', $this->user);
         }
-        if (strlen($this->port) > 0) {
+        if (Util::binaryLength($this->port) > 0) {
             $bin .= pack('a*', $this->port);
         }
-        if (strlen($this->remoteAddress) > 0) {
+        if (Util::binaryLength($this->remoteAddress) > 0) {
             $bin .= pack('a*', $this->remoteAddress);
         }
-        if (strlen($this->data) > 0) {
+        if (Util::binaryLength($this->data) > 0) {
             $bin .= pack('a*', $this->data);
         }
         return $bin;

@@ -56,7 +56,8 @@ class Header implements BinarizableInterface
      */
     public function parseBinary($binaryData)
     {
-        if (!is_null($binaryData) && strlen($binaryData) == TAC_PLUS_HDR_SIZE) {
+        $binaryLen = Util::binaryLength($binaryData);
+        if (!is_null($binaryData) && $binaryLen == TAC_PLUS_HDR_SIZE) {
             $tmp = unpack(
                 'C1version/C1type/C1seq_no/C1flags/N1session_id/N1data_len',
                 $binaryData
@@ -114,7 +115,7 @@ class Header implements BinarizableInterface
             true
         );
 
-        while (strlen(implode($md5)) < $this->lenght) {
+        while (Util::binaryLength(implode($md5)) < $this->lenght) {
             $n++;
             $md5[$n] = hash(
                 'md5',
@@ -130,7 +131,9 @@ class Header implements BinarizableInterface
             );
         }
 
-        $pseudoPad = substr(implode($md5), 0, $this->lenght);
+        $unpackMask = "a". $this->lenght ."pad";
+        $pad = unpack($unpackMask, implode($md5));
+        $pseudoPad = $pad['pad'];
 
         return $pseudoPad;
     }

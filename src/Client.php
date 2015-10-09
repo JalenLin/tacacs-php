@@ -15,6 +15,7 @@
 namespace TACACS;
 
 use Psr\Log\LoggerInterface;
+use TACACS\Common\Packet\Util;
 /**
  * Client represents a TACACS+ Client.
  *
@@ -201,15 +202,16 @@ class Client
 
         $data = $packet->toBinary();
 
-        @socket_write($this->socket, $data, strlen($data));
+        @socket_write($this->socket, $data, Util::binaryLength($data));
 
-        $unpack = unpack("H*", $data)[1];
-        $unpackHeader = unpack("H*", substr($data, 0, TAC_PLUS_HDR_SIZE))[1];
-        $unpackBody = unpack("H*", substr($data, TAC_PLUS_HDR_SIZE))[1];
+        $unpackMask = 'H' . TAC_PLUS_HDR_SIZE . 'header/H*body';
+        $unpack = unpack($unpackMask, $data);
+        $unpackHeader = $unpack['header'];
+        $unpackBody = $unpack['body'];
 
-        $this->log("SENT: ". print_r($unpack, true));
-        $this->log("SENT (Header): ". print_r($unpackHeader, true));
-        $this->log("SENT (Body): " . print_r($unpackBody, true));
+        $this->log("SENT: ". implode($unpack));
+        $this->log("SENT (Header): ". $unpackHeader);
+        $this->log("SENT (Body): " . $unpackBody);
     }
 
     /**
