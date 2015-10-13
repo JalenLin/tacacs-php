@@ -40,7 +40,7 @@ $srv->setServer(
     $tacacs_server_port,
     $tacacs_server_secret
 );
-
+$srv->setTimeout(1.5);
 $res = $srv->authenticate(
     $tacacs_user_username,
     $tacacs_user_password,

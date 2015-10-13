@@ -35,6 +35,7 @@ class Client
     protected $port = 49;
     protected $secret = 'secretkey';
     protected $socket = null;
+    protected $socketTimeout = 2;
     protected $lastSeqNo = 0;
 
     protected $startPacketBuilder;
@@ -69,6 +70,18 @@ class Client
     }
 
     /**
+     * Set socket timeout
+     *
+     * @param string $sec Timeout in seconds
+     *
+     * @return void
+     */
+    public function setTimeout($sec)
+    {
+        $this->socketTimeout = $sec;
+    }
+
+    /**
      * Authenticate
      *
      * @param string $username The username
@@ -80,48 +93,55 @@ class Client
      */
     public function authenticate($username, $password, $port = null, $addr = null)
     {
-        $this->connect();
-
-        $sessionId = $this->genSessionId();
-        $this->lastSeqNo = 1;
-
-        // START
-        $builder = $this->getStartPacketBuilder();
-        $builder->setSecret($this->secret);
-        $builder->setUsername($username);
-        $builder->setPassword($password);
-        $builder->setPort($port);
-        $builder->setRemoteAddress($addr);
-        $builder->setSequenceNumber($this->lastSeqNo);
-        $builder->setSessionId($sessionId);
-        $start = $builder->build();
-        $this->send($start);
-        $this->log(print_r($start, true));
-
-        // REPLY
-        $reply = $this->recv();
-        $this->log(print_r($reply, true));
+        if ($this->connect()) {
 
 
-        $this->lastSeqNo = $reply->getHeader()->getSequenceNumber();
+            $sessionId = $this->genSessionId();
+            $this->lastSeqNo = 1;
 
-        if ($reply->getBody()->getStatus() == TAC_PLUS_AUTHEN_STATUS_PASS) {
-            return true;
+            // START
+            $builder = $this->getStartPacketBuilder();
+            $builder->setSecret($this->secret);
+            $builder->setUsername($username);
+            $builder->setPassword($password);
+            $builder->setPort($port);
+            $builder->setRemoteAddress($addr);
+            $builder->setSequenceNumber($this->lastSeqNo);
+            $builder->setSessionId($sessionId);
+            $start = $builder->build();
+            $this->send($start);
+            $this->log(print_r($start, true));
 
-        } else if ($reply->getBody()->getStatus() == TAC_PLUS_AUTHEN_STATUS_ERROR) {
-            return false;
+            // REPLY
+            $reply = $this->recv();
+            $this->log(print_r($reply, true));
 
-        } else if ($reply->getBody()->getStatus() == TAC_PLUS_AUTHEN_STATUS_FAIL) {
-            return false;
 
+            $this->lastSeqNo = $reply->getHeader()->getSequenceNumber();
+
+            if ($reply->getBody()->getStatus() == TAC_PLUS_AUTHEN_STATUS_PASS) {
+                return true;
+
+            } else if ($reply->getBody()->getStatus() == TAC_PLUS_AUTHEN_STATUS_ERROR) {
+                return false;
+
+            } else if ($reply->getBody()->getStatus() == TAC_PLUS_AUTHEN_STATUS_FAIL) {
+                return false;
+
+            } else {
+                /**
+                 * @todo CONTINUE implementation
+                 */
+                throw new \RuntimeException("Unsupported CONTINUE packet flow");
+            }
+
+            $this->disconnect();
         } else {
-            /**
-             * @todo CONTINUE implementation
-             */
-            throw new \RuntimeException("Unsupported CONTINUE packet flow");
+            $this->log(
+                "authenticate() failed: reason: unable to connect to TACACS+ server."
+            );
+            return false;
         }
-
-        $this->disconnect();
     }
 
     /**
@@ -166,10 +186,37 @@ class Client
             return false;
         }
 
+        $sec = (int)floor($this->socketTimeout);
+        $usec = (int)floor(($this->socketTimeout - $sec) * 1000000);
+
+        $result = socket_set_option(
+            $this->socket, SOL_SOCKET, SO_RCVTIMEO,
+            array('sec' => $sec, 'usec' => $usec)
+        );
+        if ($result === false) {
+            $this->log(
+                "socket_set_option() failed: reason: " .
+                socket_strerror(socket_last_error($this->socket)) . ""
+            );
+            return false;
+        }
+
+        $result = socket_set_option(
+            $this->socket, SOL_SOCKET, SO_SNDTIMEO,
+            array('sec' => $sec, 'usec' => $usec)
+        );
+        if ($result === false) {
+            $this->log(
+                "socket_set_option() failed: reason: " .
+                socket_strerror(socket_last_error($this->socket)) . ""
+            );
+            return false;
+        }
+
         $result = @socket_connect($this->socket, $this->addr, $this->port);
         if ($result === false) {
             $this->log(
-                "socket_connect() failed: reason: ($result) " .
+                "socket_connect() failed: reason: " .
                 socket_strerror(socket_last_error($this->socket)) . ""
             );
             return false;
@@ -203,6 +250,7 @@ class Client
         $data = $packet->toBinary();
 
         @socket_write($this->socket, $data, Util::binaryLength($data));
+        $this->log("DONE (wrote ". Util::binaryLength($data) ." bytes)!");
 
         $unpackMask = 'H' . TAC_PLUS_HDR_SIZE . 'header/H*body';
         $unpack = unpack($unpackMask, $data);
@@ -231,7 +279,14 @@ class Client
             $this->log("ERROR READING SOCKET!");
         }
 
-        $this->log("RECV: ". print_r(unpack("H*", $out)[1], true) ."");
+        $unpackMask = 'H' . TAC_PLUS_HDR_SIZE . 'header/H*body';
+        $unpack = unpack($unpackMask, $out);
+        $unpackHeader = $unpack['header'];
+        $unpackBody = $unpack['body'];
+
+        $this->log("RECV: ". implode($unpack));
+        $this->log("RECV (Header): ". $unpackHeader);
+        $this->log("RECV (Body): " . $unpackBody);
 
         $builder = $this->getReplyPacketBuilder();
         $builder->setSecret($this->secret);
