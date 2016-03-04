@@ -1,6 +1,7 @@
 {
     "name": "martinclaro/tacacs-php",
     "description": "TACACS+ Client developed in PHP",
+    "version": "1.0.0",
     "type": "library",
     "license": "GNU-2",
     "authors": [
